@@ -1,0 +1,136 @@
+openapi: 3.0.0
+info:
+  title: My NodeJs App API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+
+tags:
+  - name: Test
+    description: Test related endpoints
+
+paths:
+  /test:
+    get:
+      summary: Test API
+      operationId: getTest
+      tags:
+        - Test
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/headerLanguage'
+        - $ref: '#/components/parameters/headerDeviceType'
+        - $ref: '#/components/parameters/headerPlatform'
+        - $ref: '#/components/parameters/headerVersion'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseWithUser'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  parameters:
+    headerLanguage:
+      name: Accept-Language
+      in: header
+      description: Language preference
+      required: false
+      schema:
+        type: string
+        example: en
+
+    headerDeviceType:
+      name: X-Device-Type
+      in: header
+      description: Device type (mobile/desktop)
+      required: false
+      schema:
+        type: string
+        example: mobile
+
+    headerPlatform:
+      name: X-Platform
+      in: header
+      description: Platform (iOS/Android/Web)
+      required: false
+      schema:
+        type: string
+        example: web
+
+    headerVersion:
+      name: X-Version
+      in: header
+      description: App version
+      required: false
+      schema:
+        type: string
+        example: "1.0.0"
+
+  responses:
+    BadRequestError:
+      description: Request fails validation or doesn't meet all conditions for request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Validation failed
+              data:
+                type: object
+                nullable: true
+    NotFoundError:
+      description: Requested resource was not found
+    UnauthorizedError:
+      description: Access token is missing or invalid
+
+  schemas:
+    ApiResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Test successful
+        data:
+          type: object
+          description: Response payload, can be any object
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          example: john@yopmail.com
+
+    ApiResponseWithUser:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+
